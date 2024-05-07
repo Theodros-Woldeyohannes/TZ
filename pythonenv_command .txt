@@ -1,0 +1,1 @@
+conda create -n TZ_env python=3.12 numpy pandas geopandas rasterio seaborn scipy matplotlib notebook
