@@ -56,6 +56,9 @@ for raster_file in raster_files:
         list_name_RWPR = f"RWPR_{raster_name}"
         extracted_values[list_name_RWPR] = values_RWPR.tolist()
 
+# Define the list of analytes
+analytes = ['UTAS', 'UV', 'USE', 'UFE', 'UBE', 'UCO', 'USR', 'UMO', 'USN', 'USB', 'UCS', 'UBA', 'UW', 'UPT', 'UPB', 'UUR', 'UCD', 'UMN', 'SCU', 'SZN', 'STAS', 'SSE']
+
 # Initialize a list to store the spearman rank coefficients for each bootstrap iteration
 bootstrap_results = []
 
