@@ -56,14 +56,17 @@ for raster_file in raster_files:
         list_name_RWPR = f"RWPR_{raster_name}"
         extracted_values[list_name_RWPR] = values_RWPR.tolist()
 
+# OPTIONAL: Drop rows where 'visit' is 3 or 4
+#data = data[~data['visit'].isin([3, 4])]
+
 # Define the list of analytes
 analytes = ['UTAS', 'UV', 'USE', 'UFE', 'UBE', 'UCO', 'USR', 'UMO', 'USN', 'USB', 'UCS', 'UBA', 'UW', 'UPT', 'UPB', 'UUR', 'UCD', 'UMN', 'SCU', 'SZN', 'STAS', 'SSE']
 
 # Initialize a list to store the spearman rank coefficients for each bootstrap iteration
 bootstrap_results = []
 
-# Run the bootstrapping 1000 times
-for _ in range(1000):
+# Run the bootstrapping n times
+for _ in range(10000):
     # Create a new column 'rand_vals' in the data DataFrame
     data['rand_vals'] = np.nan
 
