@@ -57,51 +57,62 @@ for raster_file in raster_files:
         extracted_values[list_name_RWPR] = values_RWPR.tolist()
 
 # OPTIONAL: Drop rows where 'visit' is 3 or 4
-#data = data[~data['visit'].isin([3, 4])]
+# data = data[~data['visit'].isin([3, 4])]
 
-# Define the list of analytes
+# List of analytes
 analytes = ['UTAS', 'UV', 'USE', 'UFE', 'UBE', 'UCO', 'USR', 'UMO', 'USN', 'USB', 'UCS', 'UBA', 'UW', 'UPT', 'UPB', 'UUR', 'UCD', 'UMN', 'SCU', 'SZN', 'STAS', 'SSE']
 
-# Initialize a list to store the spearman rank coefficients for each bootstrap iteration
+# List to store spearman rank coefficients for each bootstrap iteration
 bootstrap_results = []
 
-# Run the bootstrapping n times
-for _ in range(10000):
-    # Create a new column 'rand_vals' in the data DataFrame
+# Dictionary to track the first print for each analyte
+first_print = {analyte: True for analyte in analytes}
+
+# Bootstrap n times
+for _ in range(10000): # Change this
+    # Create a new column 'rand_vals' in the data df
     data['rand_vals'] = np.nan
 
-    # Populate 'rand_vals' with random values from the corresponding dictionary in extracted_values
+    # Write random values from extracted_values to rand_values based on dictionary key
     for index, row in data.iterrows():
         community = row['community']
         raster = row['raster']
         key = f"{community}_{raster}"
         
         if key in extracted_values:
-            # Extract one random value from the list
+            # Extract one random value 
             random_value = random.choice(extracted_values[key])
             data.at[index, 'rand_vals'] = random_value
 
-    # Initialize a dictionary to store the spearman rank coefficients for this iteration
+    # Dictionary to store spearman rank coefficients for iteration
     spearman_results = {analyte: np.nan for analyte in analytes}
 
-    # Calculate the spearman rank coefficient between 'rand_vals' and each analyte
+    # Spearman rank coefficient between 'rand_vals' and each analyte
     for analyte in analytes:
         analyte_values = data[analyte]
+        
+        # Drop NA 
+        clean_data = data.dropna(subset=['rand_vals', analyte])
+        
+        # Count NA
+        na_count = len(data) - len(clean_data)
+        if first_print[analyte]:
+            print(f'# NAs in {analyte}: {na_count}')
+            first_print[analyte] = False
+        
         if pd.api.types.is_numeric_dtype(analyte_values) and len(analyte_values.unique()) > 1:
-            correlation, _ = spearmanr(data['rand_vals'], analyte_values)
+            correlation, _ = spearmanr(clean_data['rand_vals'], clean_data[analyte])
             spearman_results[analyte] = correlation
 
-    # Append the results of this iteration to the bootstrap_results list
+    # Append each iteration to bootstrap_results 
     bootstrap_results.append(spearman_results)
 
-# Convert the bootstrap_results to a DataFrame for easier analysis
+# Convert bootstrap_results to df
 bootstrap_df = pd.DataFrame(bootstrap_results)
 
-# Save the DataFrame to a CSV file
+# Save as csv
 output_path = file_path + '/bootstrap_spearman_df.csv'
 bootstrap_df.to_csv(output_path, index=False)
-
-# Confirm that the file has been saved
 output_path
 
 print(bootstrap_df.head())
